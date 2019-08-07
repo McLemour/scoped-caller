@@ -16,11 +16,14 @@ public:
 	ScopedCaller(F&& i_f, Args&&... i_args)
 		: m_uncaught_exceptions{ std::uncaught_exceptions() }
 	{
-		auto callback = std::make_shared < std::function<std::result_of<F(Args...)>::type()> >(
-			std::bind(std::forward<F>(i_f), std::forward<Args>(i_args)...)
-			);
+		auto callback = 
+			std::bind(std::forward<F>(i_f), std::forward<Args>(i_args)...);
 
-		m_callback = [callback] { (*callback)(); };
+		m_callback = std::function<void()> {
+			// move callback to the lambda capture,
+			// since we don't need it in this scope anymore
+			[callback = std::move(callback)] { callback(); }
+		};
 	}
 
 	~ScopedCaller()
