@@ -13,8 +13,22 @@ double computation(double b)
 	return ret;
 }
 
+void test()
+{
+	ScopedCaller sc1;
+
+	auto f = sc1.Do(hello, 1);
+
+	std::thread t([&f]() {
+		f.get();
+	});
+
+	t.detach();
+}
+
 int main()
 {
-	ScopedCaller sc1(hello, 1);
-	ScopedCaller sc2(computation, 48);
+	test();
+
+	std::cin.get();
 }
